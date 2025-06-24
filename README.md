@@ -1,0 +1,2 @@
+# Collectio-veritatis
+Informacje niezależnie 
