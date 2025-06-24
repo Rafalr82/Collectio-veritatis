@@ -1,0 +1,61 @@
+<!DOCTYPE html><html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Niezależne wiadomości ze świata — aktualizowane co 2 godziny">
+  <title>Collectio Veritatis</title>
+  <style>
+    body { font-family: sans-serif; margin: 0; padding: 0; background: #f8f9fa; color: #222; }
+    header { background: #111; color: white; padding: 1rem; text-align: center; }
+    h1 { margin: 0; font-size: 2rem; }
+    h2 { color: #333; }
+    section { max-width: 900px; margin: auto; padding: 1rem; }
+    article { background: white; margin: 1rem 0; padding: 1rem; border-left: 4px solid #444; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+    footer { background: #222; color: #ccc; padding: 1rem; text-align: center; font-size: 0.9rem; }
+    .source { font-size: 0.9rem; color: #555; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Collectio Veritatis</h1>
+    <p><em>Nie kupuj poglądu. Zbuduj go.</em></p>
+  </header>  <section>
+    <h2>Najnowsze wiadomości ze świata</h2>
+    <div id="news"></div>
+  </section>  <footer>
+    &copy; 2025 Collectio Veritatis. Wszystkie prawa zastrzeżone. | Strona prywatna, oparta na niezależnych źródłach. | Możliwe reklamy Google AdSense.
+  </footer>  <script>
+    const feedUrls = [
+      'https://www.aljazeera.com/xml/rss/all.xml',
+      'https://thegrayzone.com/feed/',
+      'https://www.bellingcat.com/feed/'
+    ];
+
+    async function fetchRSS(url) {
+      const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
+      const data = await res.json();
+      const parser = new DOMParser();
+      const xml = parser.parseFromString(data.contents, "text/xml");
+      return [...xml.querySelectorAll("item")].slice(0, 5).map(item => ({
+        title: item.querySelector("title").textContent,
+        link: item.querySelector("link").textContent,
+        source: new URL(url).hostname
+      }));
+    }
+
+    async function loadNews() {
+      const container = document.getElementById("news");
+      const allItems = (await Promise.all(feedUrls.map(fetchRSS))).flat();
+      allItems.forEach(item => {
+        const el = document.createElement("article");
+        el.innerHTML = `
+          <h3><a href="${item.link}" target="_blank">${item.title}</a></h3>
+          <p class="source">Źródło: ${item.source}</p>
+        `;
+        container.appendChild(el);
+      });
+    }
+
+    loadNews();
+  </script></body>
+</html>
